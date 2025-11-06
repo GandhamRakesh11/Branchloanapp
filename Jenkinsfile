@@ -2,14 +2,14 @@ pipeline {
     agent any
 
     environment {
-        EC2_HOST = "16.171.10.78"           // ✅ change to your EC2 IP
+        EC2_HOST = "16.171.10.78"
         EC2_USER = "ubuntu"
         SSH_KEY_ID = "ec2-ssh-key"
-        PROJECT_DIR = "/home/ubuntu/Branchloanapp"   // folder on EC2
+        PROJECT_DIR = "/home/ubuntu/Branchloanapp"
     }
 
     triggers {
-        githubPush()        // ✅ GitHub webhook triggers build
+        githubPush()
     }
 
     stages {
@@ -37,7 +37,7 @@ pipeline {
                 sshagent([SSH_KEY_ID]) {
                     sh """
                     ssh -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST '
-                        cd $PROJECT_DIR &&
+                        cd $PROJECT_DIR/deploy &&
                         docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
                     '
                     """
