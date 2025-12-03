@@ -8,10 +8,6 @@ pipeline {
         PROJECT_DIR = "/home/ubuntu/Branchloanapp"
     }
 
-    triggers {
-        githubPush()
-    }
-
     stages {
 
         stage('Clone Repo') {
@@ -25,7 +21,12 @@ pipeline {
             steps {
                 sshagent([SSH_KEY_ID]) {
                     sh """
-                    rsync -avz --delete -e "ssh -o StrictHostKeyChecking=no" \
+                    ssh -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST "mkdir -p $PROJECT_DIR"
+
+                    rsync -avz --delete \
+                        --exclude='.git/' \
+                        --exclude='Jenkinsfile' \
+                        -e "ssh -o StrictHostKeyChecking=no" \
                         ./ $EC2_USER@$EC2_HOST:$PROJECT_DIR
                     """
                 }
@@ -36,10 +37,10 @@ pipeline {
             steps {
                 sshagent([SSH_KEY_ID]) {
                     sh """
-                    ssh -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST '
+                    ssh -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST "
                         cd $PROJECT_DIR/deploy &&
-                        docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
-                    '
+                        sudo docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+                    "
                     """
                 }
             }
@@ -49,9 +50,9 @@ pipeline {
             steps {
                 sshagent([SSH_KEY_ID]) {
                     sh """
-                    ssh -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST '
+                    ssh -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST "
                         curl -f http://localhost:8000/health
-                    '
+                    "
                     """
                 }
             }
