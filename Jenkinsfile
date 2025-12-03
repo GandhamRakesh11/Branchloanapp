@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        EC2_HOST = "16.171.10.78"
+        EC2_HOST = "65.0.19.85"
         EC2_USER = "ubuntu"
         SSH_KEY_ID = "ec2-ssh-key"
         PROJECT_DIR = "/home/ubuntu/Branchloanapp"
